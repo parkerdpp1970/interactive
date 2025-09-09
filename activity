@@ -1,0 +1,707 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Time Efficiency Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">Workout Time Efficiency Simulator</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Explore how exercise parameters impact your workout duration. Design time-efficient training plans that balance volume and time!
+            </p>
+        </header>
+
+        <!-- Challenge Mode Toggle -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">Challenge Mode</h2>
+                    <p class="text-gray-600">Can you design a full-body workout in under 45 minutes?</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-gray-700">Free Mode</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="challengeMode" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                    <span class="text-gray-700">Challenge Mode</span>
+                </div>
+            </div>
+            <div id="challengeStatus" class="mt-4 hidden">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-blue-800 font-medium">Target: Under 45 minutes</span>
+                        <span id="challengeResult" class="font-bold"></span>
+                    </div>
+                    <div class="w-full bg-blue-200 rounded-full h-2.5 mt-2">
+                        <div id="challengeProgress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Parameters Panel -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Workout Parameters</h2>
+                
+                <!-- Exercise Parameters -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Number of Exercises: <span id="exercisesValue" class="font-bold text-blue-600">8</span>
+                        </label>
+                        <input type="range" id="exercises" min="1" max="20" value="8" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Sets per Exercise: <span id="setsValue" class="font-bold text-blue-600">3</span>
+                        </label>
+                        <input type="range" id="sets" min="1" max="8" value="3" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Reps per Set: <span id="repsValue" class="font-bold text-blue-600">10</span>
+                        </label>
+                        <input type="range" id="reps" min="1" max="30" value="10" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <!-- Tempo Components -->
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Movement Tempo (seconds)</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Eccentric: <span id="eccentricValue" class="font-bold text-blue-600">3</span>s
+                                </label>
+                                <input type="range" id="eccentric" min="1" max="10" value="3" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Bottom Isometric: <span id="bottomIsometricValue" class="font-bold text-blue-600">1</span>s
+                                </label>
+                                <input type="range" id="bottomIsometric" min="0" max="5" value="1" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Concentric: <span id="concentricValue" class="font-bold text-blue-600">2</span>s
+                                </label>
+                                <input type="range" id="concentric" min="1" max="10" value="2" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Top Isometric: <span id="topIsometricValue" class="font-bold text-blue-600">0</span>s
+                                </label>
+                                <input type="range" id="topIsometric" min="0" max="5" value="0" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Parameters -->
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-medium text-gray-800 mb-3">Time Parameters</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Rest Time Between Sets: <span id="restValue" class="font-bold text-blue-600">60</span>s
+                            </label>
+                            <input type="range" id="rest" min="10" max="300" value="60" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Transition Time Between Exercises: <span id="transitionValue" class="font-bold text-blue-600">30</span>s
+                            </label>
+                            <input type="range" id="transition" min="10" max="120" value="30" 
+                                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Warm-up Time (minutes)</label>
+                                <input type="number" id="warmup" min="0" max="30" value="5" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cool-down Time (minutes)</label>
+                                <input type="number" id="cooldown" min="0" max="30" value="5" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="space-y-6">
+                <!-- Time Breakdown -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Workout Time Breakdown</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">Time per Rep:</span>
+                            <span id="timePerRep" class="font-bold text-blue-600">6s</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">Exercise Time per Set:</span>
+                            <span id="timePerSet" class="font-bold text-blue-600">60s</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">Total Exercise Time:</span>
+                            <span id="totalExerciseTime" class="font-bold text-blue-600">24m 0s</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">Total Rest Time:</span>
+                            <span id="totalRestTime" class="font-bold text-blue-600">24m 0s</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">Total Transition Time:</span>
+                            <span id="totalTransitionTime" class="font-bold text-blue-600">3m 30s</span>
+                        </div>
+                        
+                        <div class="border-t pt-3 mt-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-800">Total Workout Time:</span>
+                                <span id="totalWorkoutTime" class="text-2xl font-bold text-blue-700">37m 30s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Distribution Chart -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Time Distribution</h3>
+                    <div class="chart-container" style="min-height: 250px; max-height: 400px; position: relative;">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Workout Timeline -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Workout Timeline</h3>
+                    <div id="timeline" class="space-y-2">
+                        <!-- Timeline will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workout Report -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Workout Report</h2>
+            <div id="workoutReport" class="prose max-w-none">
+                <!-- Report will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables with default values
+        let timeChart = null;
+        
+        // Get all input elements
+        const inputs = {
+            exercises: document.getElementById('exercises'),
+            sets: document.getElementById('sets'),
+            reps: document.getElementById('reps'),
+            eccentric: document.getElementById('eccentric'),
+            bottomIsometric: document.getElementById('bottomIsometric'),
+            concentric: document.getElementById('concentric'),
+            topIsometric: document.getElementById('topIsometric'),
+            rest: document.getElementById('rest'),
+            transition: document.getElementById('transition'),
+            warmup: document.getElementById('warmup'),
+            cooldown: document.getElementById('cooldown'),
+            challengeMode: document.getElementById('challengeMode')
+        };
+
+        // Get all value display elements
+        const displays = {
+            exercisesValue: document.getElementById('exercisesValue'),
+            setsValue: document.getElementById('setsValue'),
+            repsValue: document.getElementById('repsValue'),
+            eccentricValue: document.getElementById('eccentricValue'),
+            bottomIsometricValue: document.getElementById('bottomIsometricValue'),
+            concentricValue: document.getElementById('concentricValue'),
+            topIsometricValue: document.getElementById('topIsometricValue'),
+            restValue: document.getElementById('restValue'),
+            transitionValue: document.getElementById('transitionValue'),
+            timePerRep: document.getElementById('timePerRep'),
+            timePerSet: document.getElementById('timePerSet'),
+            totalExerciseTime: document.getElementById('totalExerciseTime'),
+            totalRestTime: document.getElementById('totalRestTime'),
+            totalTransitionTime: document.getElementById('totalTransitionTime'),
+            totalWorkoutTime: document.getElementById('totalWorkoutTime'),
+            challengeStatus: document.getElementById('challengeStatus'),
+            challengeResult: document.getElementById('challengeResult'),
+            challengeProgress: document.getElementById('challengeProgress'),
+            workoutReport: document.getElementById('workoutReport'),
+            timeline: document.getElementById('timeline')
+        };
+
+        // Update display values for sliders
+        function updateSliderValues() {
+            try {
+                displays.exercisesValue.textContent = inputs.exercises.value;
+                displays.setsValue.textContent = inputs.sets.value;
+                displays.repsValue.textContent = inputs.reps.value;
+                displays.eccentricValue.textContent = inputs.eccentric.value;
+                displays.bottomIsometricValue.textContent = inputs.bottomIsometric.value;
+                displays.concentricValue.textContent = inputs.concentric.value;
+                displays.topIsometricValue.textContent = inputs.topIsometric.value;
+                displays.restValue.textContent = inputs.rest.value;
+                displays.transitionValue.textContent = inputs.transition.value;
+            } catch (error) {
+                console.error('Error updating slider values:', error);
+            }
+        }
+
+        // Calculate workout times
+        function calculateWorkoutTimes() {
+            try {
+                // Validate inputs
+                const exercises = parseInt(inputs.exercises.value) || 0;
+                const sets = parseInt(inputs.sets.value) || 0;
+                const reps = parseInt(inputs.reps.value) || 0;
+                const eccentric = parseInt(inputs.eccentric.value) || 0;
+                const bottomIsometric = parseInt(inputs.bottomIsometric.value) || 0;
+                const concentric = parseInt(inputs.concentric.value) || 0;
+                const topIsometric = parseInt(inputs.topIsometric.value) || 0;
+                const rest = parseInt(inputs.rest.value) || 0;
+                const transition = parseInt(inputs.transition.value) || 0;
+                const warmup = parseInt(inputs.warmup.value) || 0;
+                const cooldown = parseInt(inputs.cooldown.value) || 0;
+
+                // Calculate time per rep (tempo)
+                const timePerRep = eccentric + bottomIsometric + concentric + topIsometric;
+                
+                // Calculate exercise time per set
+                const timePerSet = reps * timePerRep;
+                
+                // Calculate total exercise time
+                const totalExerciseTimeSeconds = timePerSet * sets * exercises;
+                
+                // Calculate total rest time
+                const totalRestTimeSeconds = rest * (sets - 1) * exercises;
+                
+                // Calculate total transition time
+                const totalTransitionTimeSeconds = transition * (exercises - 1);
+                
+                // Calculate total workout time in seconds
+                const totalWorkoutTimeSeconds = (warmup * 60) + totalExerciseTimeSeconds + 
+                                              totalRestTimeSeconds + totalTransitionTimeSeconds + (cooldown * 60);
+
+                return {
+                    timePerRep,
+                    timePerSet,
+                    totalExerciseTimeSeconds,
+                    totalRestTimeSeconds,
+                    totalTransitionTimeSeconds,
+                    totalWorkoutTimeSeconds,
+                    warmupMinutes: warmup,
+                    cooldownMinutes: cooldown,
+                    exercises,
+                    sets,
+                    reps,
+                    rest,
+                    transition
+                };
+            } catch (error) {
+                console.error('Error calculating workout times:', error);
+                return null;
+            }
+        }
+
+        // Format seconds to minutes and seconds
+        function formatTime(seconds) {
+            try {
+                if (typeof seconds !== 'number' || isNaN(seconds)) {
+                    return '0m 0s';
+                }
+                
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}m ${remainingSeconds}s`;
+            } catch (error) {
+                console.error('Error formatting time:', error);
+                return '0m 0s';
+            }
+        }
+
+        // Update time displays
+        function updateTimeDisplays() {
+            try {
+                const times = calculateWorkoutTimes();
+                
+                if (!times) {
+                    console.error('Failed to calculate workout times');
+                    return;
+                }
+                
+                displays.timePerRep.textContent = `${times.timePerRep}s`;
+                displays.timePerSet.textContent = `${times.timePerSet}s`;
+                displays.totalExerciseTime.textContent = formatTime(times.totalExerciseTimeSeconds);
+                displays.totalRestTime.textContent = formatTime(times.totalRestTimeSeconds);
+                displays.totalTransitionTime.textContent = formatTime(times.totalTransitionTimeSeconds);
+                displays.totalWorkoutTime.textContent = formatTime(times.totalWorkoutTimeSeconds);
+                
+                // Update challenge mode if active
+                if (inputs.challengeMode.checked) {
+                    updateChallengeMode(times.totalWorkoutTimeSeconds);
+                }
+                
+                // Update chart
+                updateTimeChart(times);
+                
+                // Update timeline
+                updateTimeline(times);
+                
+                // Update workout report
+                updateWorkoutReport(times);
+                
+            } catch (error) {
+                console.error('Error updating time displays:', error);
+            }
+        }
+
+        // Update challenge mode
+        function updateChallengeMode(totalSeconds) {
+            try {
+                displays.challengeStatus.classList.remove('hidden');
+                
+                const targetSeconds = 45 * 60; // 45 minutes in seconds
+                const percentage = Math.min((totalSeconds / targetSeconds) * 100, 100);
+                
+                displays.challengeProgress.style.width = `${percentage}%`;
+                
+                if (totalSeconds <= targetSeconds) {
+                    displays.challengeResult.textContent = 'Success! ✓';
+                    displays.challengeResult.className = 'font-bold text-green-600';
+                    displays.challengeProgress.className = 'bg-green-600 h-2.5 rounded-full';
+                } else {
+                    displays.challengeResult.textContent = 'Over target';
+                    displays.challengeResult.className = 'font-bold text-red-600';
+                    displays.challengeProgress.className = 'bg-red-600 h-2.5 rounded-full';
+                }
+            } catch (error) {
+                console.error('Error updating challenge mode:', error);
+            }
+        }
+
+        // Initialize or update time distribution chart
+        function updateTimeChart(times) {
+            try {
+                const ctx = document.getElementById('timeChart').getContext('2d');
+                
+                const data = {
+                    labels: ['Warm-up', 'Exercise Time', 'Rest Time', 'Transition Time', 'Cool-down'],
+                    datasets: [{
+                        data: [
+                            times.warmupMinutes * 60,
+                            times.totalExerciseTimeSeconds,
+                            times.totalRestTimeSeconds,
+                            times.totalTransitionTimeSeconds,
+                            times.cooldownMinutes * 60
+                        ],
+                        backgroundColor: [
+                            '#F59E0B', // Warm-up - amber
+                            '#3B82F6', // Exercise - blue
+                            '#10B981', // Rest - emerald
+                            '#8B5CF6', // Transition - violet
+                            '#EF4444'  // Cool-down - red
+                        ],
+                        borderWidth: 0
+                    }]
+                };
+
+                if (timeChart) {
+                    timeChart.data = data;
+                    timeChart.update();
+                } else {
+                    timeChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 15,
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = formatTime(context.parsed);
+                                            return `${label}: ${value}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating time chart:', error);
+            }
+        }
+
+        // Update workout timeline
+        function updateTimeline(times) {
+            try {
+                let html = '';
+                
+                // Warm-up
+                if (times.warmupMinutes > 0) {
+                    html += `
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-amber-500 mr-3"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Warm-up</span>
+                                    <span class="text-sm text-gray-600">${formatTime(times.warmupMinutes * 60)}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-amber-500 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Exercise blocks
+                for (let i = 0; i < times.exercises; i++) {
+                    const exerciseTime = times.timePerSet * times.sets;
+                    const exerciseRest = times.rest * (times.sets - 1);
+                    
+                    html += `
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mr-3"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Exercise ${i + 1}</span>
+                                    <span class="text-sm text-gray-600">${formatTime(exerciseTime + exerciseRest)}</span>
+                                </div>
+                                <div class="flex gap-1 mt-1">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${exerciseTime / (exerciseTime + exerciseRest) * 100}%"></div>
+                                    </div>
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-emerald-500 h-2 rounded-full" style="width: ${exerciseRest / (exerciseTime + exerciseRest) * 100}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex text-xs text-gray-500 mt-1">
+                                    <span class="flex-1">Exercise</span>
+                                    <span class="flex-1">Rest</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add transition if not last exercise
+                    if (i < times.exercises - 1 && times.transition > 0) {
+                        html += `
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-violet-500 mr-3"></div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Transition</span>
+                                        <span class="text-sm text-gray-600">${formatTime(times.transition)}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                        <div class="bg-violet-500 h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Cool-down
+                if (times.cooldownMinutes > 0) {
+                    html += `
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-red-500 mr-3"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Cool-down</span>
+                                    <span class="text-sm text-gray-600">${formatTime(times.cooldownMinutes * 60)}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                displays.timeline.innerHTML = html;
+            } catch (error) {
+                console.error('Error updating timeline:', error);
+            }
+        }
+
+        // Update workout report
+        function updateWorkoutReport(times) {
+            try {
+                const totalTime = times.totalWorkoutTimeSeconds;
+                const exercisePercentage = (times.totalExerciseTimeSeconds / totalTime * 100).toFixed(1);
+                const restPercentage = (times.totalRestTimeSeconds / totalTime * 100).toFixed(1);
+                
+                let insights = '';
+                
+                // Generate insights based on the workout parameters
+                if (times.exercises > 12) {
+                    insights += '<li>You have a high number of exercises. Consider focusing on compound movements to reduce total time.</li>';
+                } else if (times.exercises < 5) {
+                    insights += '<li>You have a low number of exercises. Make sure each exercise targets multiple muscle groups for efficiency.</li>';
+                }
+                
+                if (times.sets > 4) {
+                    insights += '<li>High set volume increases workout time significantly. Consider supersets to save time.</li>';
+                }
+                
+                if (times.rest > 90) {
+                    insights += '<li>Long rest periods contribute heavily to total workout time. Consider active recovery between sets.</li>';
+                }
+                
+                if (times.timePerRep > 8) {
+                    insights += '<li>Slow tempo increases time under tension but extends workout duration. Balance tempo with time constraints.</li>';
+                }
+                
+                if (exercisePercentage < 40) {
+                    insights += '<li>Your exercise time is less than 40% of total workout time. Consider reducing rest or transition times.</li>';
+                }
+                
+                if (restPercentage > 50) {
+                    insights += '<li>Rest time makes up more than half your workout. Consider circuit training to reduce total time.</li>';
+                }
+                
+                if (insights === '') {
+                    insights = '<li>Good balance of exercise parameters for time efficiency!</li>';
+                }
+                
+                const report = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Workout Summary</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Exercises:</strong> ${times.exercises}</li>
+                                <li><strong>Sets per Exercise:</strong> ${times.sets}</li>
+                                <li><strong>Reps per Set:</strong> ${times.reps}</li>
+                                <li><strong>Tempo:</strong> ${times.eccentric}-${times.bottomIsometric}-${times.concentric}-${times.topIsometric} seconds</li>
+                                <li><strong>Rest Between Sets:</strong> ${times.rest} seconds</li>
+                                <li><strong>Transition Time:</strong> ${times.transition} seconds</li>
+                                <li><strong>Warm-up:</strong> ${times.warmupMinutes} minutes</li>
+                                <li><strong>Cool-down:</strong> ${times.cooldownMinutes} minutes</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Time Analysis</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Exercise Time:</strong> ${formatTime(times.totalExerciseTimeSeconds)} (${exercisePercentage}%)</li>
+                                <li><strong>Rest Time:</strong> ${formatTime(times.totalRestTimeSeconds)} (${restPercentage}%)</li>
+                                <li><strong>Transition Time:</strong> ${formatTime(times.totalTransitionTimeSeconds)}</li>
+                                <li><strong>Total Workout Time:</strong> ${formatTime(totalTime)}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Insights & Recommendations</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            ${insights}
+                        </ul>
+                    </div>
+                `;
+                
+                displays.workoutReport.innerHTML = report;
+            } catch (error) {
+                console.error('Error updating workout report:', error);
+            }
+        }
+
+        // Add event listeners
+        function addEventListeners() {
+            try {
+                // Slider inputs
+                Object.keys(inputs).forEach(key => {
+                    if (inputs[key].type === 'range' || inputs[key].type === 'number') {
+                        inputs[key].addEventListener('input', () => {
+                            updateSliderValues();
+                            updateTimeDisplays();
+                        });
+                    }
+                });
+                
+                // Challenge mode toggle
+                inputs.challengeMode.addEventListener('change', () => {
+                    if (inputs.challengeMode.checked) {
+                        displays.challengeStatus.classList.remove('hidden');
+                        const times = calculateWorkoutTimes();
+                        if (times) {
+                            updateChallengeMode(times.totalWorkoutTimeSeconds);
+                        }
+                    } else {
+                        displays.challengeStatus.classList.add('hidden');
+                    }
+                });
+                
+                // Initial update
+                updateSliderValues();
+                updateTimeDisplays();
+            } catch (error) {
+                console.error('Error adding event listeners:', error);
+            }
+        }
+
+        // Initialize the application
+        function init() {
+            try {
+                addEventListeners();
+                console.log('Workout Time Efficiency Simulator initialized successfully');
+            } catch (error) {
+                console.error('Error initializing application:', error);
+            }
+        }
+
+        // Start the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
